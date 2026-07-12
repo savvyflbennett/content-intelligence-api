@@ -63,14 +63,10 @@ const paymentConfig = {
   }
 };
 
-// CORS must come FIRST so browsers accept ALL responses (including 402)
+// CORS first, then body parser, then x402
 app.use(cors());
-
-// Apply x402 payment middleware
-app.use(paymentMiddleware(paymentConfig, server));
-
-// Apply body parser
 app.use(express.json({ limit: '2mb' }));
+app.use(paymentMiddleware(paymentConfig, server));
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -229,7 +225,6 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'content-intelligence-api' });
 });
 
-// Discovery endpoint for AI agents (kept for backward compatibility)
 app.get('/.well-known/x402', (req, res) => {
   res.json({
     name: 'Content Intelligence API',
