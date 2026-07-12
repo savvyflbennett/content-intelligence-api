@@ -28,10 +28,42 @@ const paymentConfig = {
     }],
     description: 'Analyze raw text and extract structured ideas, themes, and insights',
     mimeType: 'application/json',
+    extensions: {
+      'bazaar': {
+        name: 'Content Intelligence API',
+        description: 'Extracts business ideas, themes, sentiment, and insights from text discussions. Perfect for analyzing social media comments, forum posts, and brainstorming sessions.',
+        tags: ['business-analysis', 'idea-extraction', 'sentiment-analysis', 'ai-insights', 'content-intelligence'],
+        category: 'Data & Social APIs',
+        input_schema: {
+          type: 'object',
+          properties: {
+            text: { type: 'string', description: 'Raw text to analyze (min 10 characters)' },
+            context: { type: 'string', description: 'Context about the text source (e.g., "TikTok comments")' }
+          },
+          required: ['text']
+        },
+        output_schema: {
+          type: 'object',
+          properties: {
+            top_ideas: { type: 'array', description: 'Ranked business ideas with profit potential and feasibility scores' },
+            themes: { type: 'array', description: 'Key themes found in the text' },
+            sentiment: { type: 'string', enum: ['optimistic', 'neutral', 'pessimistic', 'mixed'] },
+            hidden_gems: { type: 'array', description: 'Overlooked high-value insights' },
+            red_flags: { type: 'array', description: 'Warnings and risky advice detected' },
+            executive_summary: { type: 'string', description: '2-3 sentence overview' }
+          }
+        },
+        pricing: {
+          per_call: '$1.00',
+          currency: 'USDC',
+          network: 'Base Sepolia'
+        }
+      }
+    }
   }
 };
 
-// ✅ CORS must come FIRST so browsers accept ALL responses (including 402)
+// CORS must come FIRST so browsers accept ALL responses (including 402)
 app.use(cors());
 
 // Apply x402 payment middleware
@@ -99,12 +131,10 @@ Rules:
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.3,
       max_tokens: 2000,
+      response_format: { type: "json_object" }
     });
 
-    let rawResponse = completion.choices[0].message.content;
-    rawResponse = rawResponse.replace(/```json/g, '').replace(/```/g, '').trim();
-    
-    const analysis = JSON.parse(rawResponse);
+    const analysis = JSON.parse(completion.choices[0].message.content);
 
     res.json({
       success: true,
@@ -128,6 +158,28 @@ Rules:
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'content-intelligence-api' });
+});
+
+// Discovery endpoint for AI agents
+app.get('/.well-known/x402', (req, res) => {
+  res.json({
+    name: 'Content Intelligence API',
+    description: 'AI-powered business idea extraction from text discussions, social media comments, and brainstorming sessions.',
+    version: '1.0.0',
+    endpoints: [
+      {
+        path: '/analyze-ideas',
+        method: 'POST',
+        price: '$1.00',
+        currency: 'USDC',
+        network: 'eip155:84532',
+        description: 'Analyze text and extract structured business insights including ideas, themes, sentiment, hidden gems, and red flags'
+      }
+    ],
+    contact: {
+      url: 'https://github.com/savvyflbennett/content-intelligence-api'
+    }
+  });
 });
 
 app.listen(process.env.PORT || 10000, () => {
