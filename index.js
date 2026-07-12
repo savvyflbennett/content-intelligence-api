@@ -74,6 +74,75 @@ app.use(express.json({ limit: '2mb' }));
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// OpenAPI discovery document for x402scan
+app.get('/openapi.json', (req, res) => {
+  res.json({
+    openapi: '3.1.0',
+    info: {
+      title: 'Content Intelligence API',
+      version: '1.0.0',
+      description: 'AI-powered business idea extraction from text discussions, social media comments, and brainstorming sessions.',
+      'x-guidance': 'Use POST /analyze-ideas to extract business ideas, themes, sentiment, hidden gems, and red flags from any text. Send a JSON body with "text" (required, min 10 chars) and optional "context" fields.'
+    },
+    paths: {
+      '/analyze-ideas': {
+        post: {
+          operationId: 'analyzeIdeas',
+          summary: 'Analyze Ideas - Extract business insights from text',
+          tags: ['Analysis'],
+          'x-payment-info': {
+            price: { mode: 'fixed', currency: 'USD', amount: '1.00' },
+            protocols: [{ 'x402': {} }]
+          },
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    text: { type: 'string', minLength: 10, description: 'Raw text to analyze (minimum 10 characters)' },
+                    context: { type: 'string', description: 'Context about the text source (e.g., "TikTok comments", "Reddit thread")' }
+                  },
+                  required: ['text']
+                }
+              }
+            }
+          },
+          responses: {
+            '200': {
+              description: 'Successful analysis',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean' },
+                      analysis: {
+                        type: 'object',
+                        properties: {
+                          top_ideas: { type: 'array', description: 'Ranked business ideas' },
+                          themes: { type: 'array', description: 'Key themes' },
+                          sentiment: { type: 'string' },
+                          hidden_gems: { type: 'array', description: 'Overlooked insights' },
+                          red_flags: { type: 'array', description: 'Warnings' },
+                          executive_summary: { type: 'string' }
+                        }
+                      },
+                      meta: { type: 'object' }
+                    }
+                  }
+                }
+              }
+            },
+            '402': { description: 'Payment Required - $1.00 USDC on Base Sepolia' }
+          }
+        }
+      }
+    }
+  });
+});
+
 app.post('/analyze-ideas', async (req, res) => {
   try {
     const { text, context = 'General discussion' } = req.body;
@@ -160,7 +229,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'content-intelligence-api' });
 });
 
-// Discovery endpoint for AI agents
+// Discovery endpoint for AI agents (kept for backward compatibility)
 app.get('/.well-known/x402', (req, res) => {
   res.json({
     name: 'Content Intelligence API',
