@@ -31,8 +31,8 @@ const paymentConfig = {
   }
 };
 
-// Apply x402 payment middleware BEFORE express.json() and CORS
-// app.use(paymentMiddleware(paymentConfig, server));
+// ✅ Apply x402 payment middleware BEFORE express.json() and CORS
+app.use(paymentMiddleware(paymentConfig, server));
 
 // Now apply regular middleware
 app.use(cors());
@@ -129,7 +129,7 @@ app.get('/health', (req, res) => {
 });
 
 app.listen(process.env.PORT || 10000, () => {
-  console.log(`🚀 Content Intelligence API live on port ${process.env.PORT || 4021}`);
+  console.log(`🚀 Content Intelligence API live on port ${process.env.PORT || 10000}`);
   console.log(`💰 Charging $1.00 per /analyze-ideas call`);
-  console.log(`📥 Test with: curl -X POST http://localhost:4021/analyze-ideas -H "Content-Type: application/json" -d '{"text":"your text here"}'`);
+  console.log(`📥 Test with: curl -X POST http://localhost:10000/analyze-ideas -H "Content-Type: application/json" -d '{"text":"your text here"}'`);
 });
