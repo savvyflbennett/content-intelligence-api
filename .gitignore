@@ -1,3 +1,5 @@
 node_modules/
 .env
 Keys.txt
+test-payload.json
+*.backup

@@ -31,11 +31,13 @@ const paymentConfig = {
   }
 };
 
-// ✅ Apply x402 payment middleware BEFORE express.json() and CORS
+// ✅ CORS must come FIRST so browsers accept ALL responses (including 402)
+app.use(cors());
+
+// Apply x402 payment middleware
 app.use(paymentMiddleware(paymentConfig, server));
 
-// Now apply regular middleware
-app.use(cors());
+// Apply body parser
 app.use(express.json({ limit: '2mb' }));
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
