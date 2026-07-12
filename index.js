@@ -63,10 +63,14 @@ const paymentConfig = {
   }
 };
 
-// CORS first, then body parser, then x402
+// CORS first
 app.use(cors());
-app.use(express.json({ limit: '2mb' }));
+
+// x402 payment middleware BEFORE body parser so it intercepts first
 app.use(paymentMiddleware(paymentConfig, server));
+
+// Body parser AFTER x402
+app.use(express.json({ limit: '2mb' }));
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
