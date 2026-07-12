@@ -27,7 +27,7 @@ async function analyze() {
   result.textContent = 'Analyzing... this may take 10-20 seconds';
   
   try {
-    const res = await fetch('https://content-intelligence-api.onrender.com/analyze-ideas', {
+    const res = await fetch('https://content-intelligence-api-xl9z.onrender.com/analyze-ideas', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({text: text, context: 'TikTok comments about AI-built businesses'})
