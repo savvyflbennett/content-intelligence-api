@@ -16,14 +16,14 @@ const facilitator = new HTTPFacilitatorClient({
 });
 
 const server = new x402ResourceServer(facilitator)
-  .register('eip155:84532', new ExactEvmScheme());
+  .register('eip155:8453', new ExactEvmScheme());  // Base mainnet
 
 const paymentConfig = {
   'POST /analyze-ideas': {
     accepts: [{
       scheme: 'exact',
       price: '$1.00',
-      network: 'eip155:84532',
+      network: 'eip155:8453',  // Base mainnet
       payTo: payTo,
     }],
     description: 'Analyze raw text and extract structured ideas, themes, and insights',
@@ -56,25 +56,19 @@ const paymentConfig = {
         pricing: {
           per_call: '$1.00',
           currency: 'USDC',
-          network: 'Base Sepolia'
+          network: 'Base'
         }
       }
     }
   }
 };
 
-// CORS first
 app.use(cors());
-
-// x402 payment middleware BEFORE body parser so it intercepts first
-app.use(paymentMiddleware(paymentConfig, server));
-
-// Body parser AFTER x402
 app.use(express.json({ limit: '2mb' }));
+app.use(paymentMiddleware(paymentConfig, server));
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// OpenAPI discovery document for x402scan
 app.get('/openapi.json', (req, res) => {
   res.json({
     openapi: '3.1.0',
@@ -135,7 +129,7 @@ app.get('/openapi.json', (req, res) => {
                 }
               }
             },
-            '402': { description: 'Payment Required - $1.00 USDC on Base Sepolia' }
+            '402': { description: 'Payment Required - $1.00 USDC on Base' }
           }
         }
       }
@@ -240,7 +234,7 @@ app.get('/.well-known/x402', (req, res) => {
         method: 'POST',
         price: '$1.00',
         currency: 'USDC',
-        network: 'eip155:84532',
+        network: 'eip155:8453',
         description: 'Analyze text and extract structured business insights including ideas, themes, sentiment, hidden gems, and red flags'
       }
     ],
