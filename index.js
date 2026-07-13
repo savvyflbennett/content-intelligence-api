@@ -16,47 +16,49 @@ const facilitator = new HTTPFacilitatorClient({
 });
 
 const server = new x402ResourceServer(facilitator)
-  .register('eip155:8453', new ExactEvmScheme());  // Base mainnet
+  .register('eip155:84532', new ExactEvmScheme());  // Base Sepolia - what facilitator supports
 
 const paymentConfig = {
   'POST /analyze-ideas': {
     accepts: [{
       scheme: 'exact',
       price: '$1.00',
-      network: 'eip155:8453',  // Base mainnet
+      network: 'eip155:84532',  // Base Sepolia
       payTo: payTo,
     }],
     description: 'Analyze raw text and extract structured ideas, themes, and insights',
     mimeType: 'application/json',
     extensions: {
-      'bazaar': {
-        name: 'Content Intelligence API',
-        description: 'Extracts business ideas, themes, sentiment, and insights from text discussions. Perfect for analyzing social media comments, forum posts, and brainstorming sessions.',
-        tags: ['business-analysis', 'idea-extraction', 'sentiment-analysis', 'ai-insights', 'content-intelligence'],
-        category: 'Data & Social APIs',
-        input_schema: {
-          type: 'object',
-          properties: {
-            text: { type: 'string', description: 'Raw text to analyze (min 10 characters)' },
-            context: { type: 'string', description: 'Context about the text source (e.g., "TikTok comments")' }
-          },
-          required: ['text']
-        },
-        output_schema: {
-          type: 'object',
-          properties: {
-            top_ideas: { type: 'array', description: 'Ranked business ideas with profit potential and feasibility scores' },
-            themes: { type: 'array', description: 'Key themes found in the text' },
-            sentiment: { type: 'string', enum: ['optimistic', 'neutral', 'pessimistic', 'mixed'] },
-            hidden_gems: { type: 'array', description: 'Overlooked high-value insights' },
-            red_flags: { type: 'array', description: 'Warnings and risky advice detected' },
-            executive_summary: { type: 'string', description: '2-3 sentence overview' }
+      'bazaar': {  // ✅ Fixed format with info and schema
+        info: {
+          name: 'Content Intelligence API',
+          description: 'Extracts business ideas, themes, sentiment, and insights from text discussions. Perfect for analyzing social media comments, forum posts, and brainstorming sessions.',
+          tags: ['business-analysis', 'idea-extraction', 'sentiment-analysis', 'ai-insights', 'content-intelligence'],
+          category: 'Data & Social APIs',
+          contact: {
+            email: 'savvyflbennett@gmail.com'
           }
         },
-        pricing: {
-          per_call: '$1.00',
-          currency: 'USDC',
-          network: 'Base'
+        schema: {
+          input: {
+            type: 'object',
+            properties: {
+              text: { type: 'string', description: 'Raw text to analyze (min 10 characters)' },
+              context: { type: 'string', description: 'Context about the text source (e.g., "TikTok comments")' }
+            },
+            required: ['text']
+          },
+          output: {
+            type: 'object',
+            properties: {
+              top_ideas: { type: 'array', description: 'Ranked business ideas with profit potential and feasibility scores' },
+              themes: { type: 'array', description: 'Key themes found in the text' },
+              sentiment: { type: 'string', enum: ['optimistic', 'neutral', 'pessimistic', 'mixed'] },
+              hidden_gems: { type: 'array', description: 'Overlooked high-value insights' },
+              red_flags: { type: 'array', description: 'Warnings and risky advice detected' },
+              executive_summary: { type: 'string', description: '2-3 sentence overview' }
+            }
+          }
         }
       }
     }
@@ -76,7 +78,10 @@ app.get('/openapi.json', (req, res) => {
       title: 'Content Intelligence API',
       version: '1.0.0',
       description: 'AI-powered business idea extraction from text discussions, social media comments, and brainstorming sessions.',
-      'x-guidance': 'Use POST /analyze-ideas to extract business ideas, themes, sentiment, hidden gems, and red flags from any text. Send a JSON body with "text" (required, min 10 chars) and optional "context" fields.'
+      'x-guidance': 'Use POST /analyze-ideas to extract business ideas, themes, sentiment, hidden gems, and red flags from any text. Send a JSON body with "text" (required, min 10 chars) and optional "context" fields.',
+      contact: {
+        email: 'savvyflbennett@gmail.com'
+      }
     },
     paths: {
       '/analyze-ideas': {
@@ -129,7 +134,7 @@ app.get('/openapi.json', (req, res) => {
                 }
               }
             },
-            '402': { description: 'Payment Required - $1.00 USDC on Base' }
+            '402': { description: 'Payment Required - $1.00 USDC on Base Sepolia' }
           }
         }
       }
@@ -234,11 +239,12 @@ app.get('/.well-known/x402', (req, res) => {
         method: 'POST',
         price: '$1.00',
         currency: 'USDC',
-        network: 'eip155:8453',
+        network: 'eip155:84532',
         description: 'Analyze text and extract structured business insights including ideas, themes, sentiment, hidden gems, and red flags'
       }
     ],
     contact: {
+      email: 'savvyflbennett@gmail.com',
       url: 'https://github.com/savvyflbennett/content-intelligence-api'
     }
   });
